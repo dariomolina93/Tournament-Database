@@ -19,15 +19,18 @@ CREATE DATABASE tournament;
 --create players table with the appropiate attributes
 CREATE TABLE players (
 id serial not null primary key,
-name text,
-wins integer not null,
-loses integer not null
+name text
 );
 
 --create players table with appropiate attributes
 CREATE TABLE matches(
 match_id serial not null primary key,
-player_one_id serial not null references players,
-player_two_id serial not null references players,
-winner_id serial not null references players
+winner_id serial not null references players,
+loser_id serial not null references players
+);
+
+CREATE TABLE statistics(
+	id serial not null references players,
+	wins integer not null,
+	loses integer not null
 );

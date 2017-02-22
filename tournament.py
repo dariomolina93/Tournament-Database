@@ -28,7 +28,7 @@ def deleteMatches():
     connection.commit()
 
     #update players table 
-    cursor.execute("update players  set wins = 0, loses = 0;")
+    cursor.execute("update statistics set wins = 0, loses = 0;")
 
     #commit to prevent any rollbacks
     connection.commit()
@@ -46,11 +46,16 @@ def deletePlayers():
     #obtain the cursor to perform the queries
     cursor = connection.cursor()
 
-    #delete all data from players table
-    cursor.execute("DELETE FROM players;")
+    #first need to delete statistics to prevent any key dependant error since id is reference to players.
+    cursor.execute("DELETE FROM statistics;")
 
     #commit to prevent any rollbacks
     connection.commit()
+
+    #delete all data from players table
+    cursor.execute("DELETE FROM players;")
+    connection.commit()
+
 
     connection.close()
 
@@ -68,13 +73,13 @@ def countPlayers():
     cursor.execute("select count(id) as num from players;")
 
     #get the resulting table and storing it
-    value = cursor.fetchall()
-
+    value = cursor.fetchone()[0]
     connection.close()
 
     #return the first value of querie since its the amount of players in table
-    return value [0][0]
+    return value 
     
+countPlayers()
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
@@ -96,7 +101,11 @@ def registerPlayer(name):
     cursor = connection.cursor()
 
     #insert data into table, "register player"
-    cursor.execute("insert into players(name,wins,loses) values(%s, %s, %s);", (name,0,0,))
+    cursor.execute("insert into players(name) values(%s);", (name,))
+    connection.commit()
+
+    #insert into statistics table initial values since they haven't played yet.
+    cursor.execute("insert into statistics(wins, loses) values(0,0);")
 
     #commit to prevent any rollbacks
     connection.commit()
@@ -124,7 +133,7 @@ def playerStandings():
     cursor = connection.cursor()
 
     #querie that returns players and their win records sorted by wins
-    cursor.execute("select id, name, wins, (wins + loses) as totalGames from players order by wins;")
+    cursor.execute("select players.id, players.name, statistics.wins, (statistics.wins + statistics.loses) as totalGames from players join statistics on players.id = statistics.id order by wins;")
 
     #store the results of the query 
     standings = cursor.fetchall()
@@ -148,17 +157,17 @@ def reportMatch(winner, loser):
     cursor = connection.cursor()
 
     #insert into table matches the match between winner and loser
-    cursor.execute("insert into matches(player_one_id,player_two_id,winner_id) values (%s,%s,%s);", (winner,loser,winner,))
+    cursor.execute("insert into matches(winner_id, loser_id) values (%s,%s);", (winner,loser,))
    
     #commit to prevent any rollbacks
     connection.commit()
 
     #update the information in the players table based on the winner and loser
-    cursor.execute("update players set wins = wins + 1 where id = %s;", (winner,))
+    cursor.execute("update statistics set wins = wins + 1 where id = %s;", (winner,))
     connection.commit()
 
     #update information in players table for loser
-    cursor.execute("update players set loses = loses + 1 where id = %s;", (loser,))
+    cursor.execute("update statistics set loses = loses + 1 where id = %s;", (loser,))
     connection.commit()
 
 
