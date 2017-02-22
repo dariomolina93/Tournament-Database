@@ -3,9 +3,11 @@
 Welcome! This project is for the Fullstack Nanodegree program from Udacity. It is a tournament database that follows the swiss tournament system.
 
 Instructions
+
 1. Make sure you install vagrant. For information on installation and set up, click on this link https://goo.gl/LacvLA (You will first have to log on to udacity).
 
 2.Start Vagrant
+
  -Once you intalled vagrant and cloned this repo, open up a terminal and go to the vagrant directory
 
  -Once in there type in 'vagrant up'
